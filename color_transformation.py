@@ -12,7 +12,7 @@ def rgb2gray(image: np.ndarray, mode: str):
     gray_img = np.zeros((h, w))
 
     mode_list = ['add', 'mid']
-    assert mode in mode_list, logger.error('Wrong mode for {}!'.format(__name__ + '.gray_img'))
+    assert mode in mode_list, logger.error('Wrong "mode" for {}: "{}" not in {}!'.format('"gray_img"', mode, mode_list))
 
     if mode == 'add':
         for i in range(h):

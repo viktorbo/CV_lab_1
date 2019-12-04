@@ -13,14 +13,13 @@ log.basicConfig(level=log.DEBUG,
 
 def fix_contrast(img: np.ndarray):
     logger = log.getLogger('fix_contrast')
-    #this func only for 1-channel images
     min = np.amin(img)
     max = np.amax(img)
     k = 255 / (max - min)
 
     logger.info('Run fix_contrast converter')
-    logger.info('MIN: {}'.format(min))
-    logger.info('MAX: {}'.format(max))
+    logger.info('MIN value: {}'.format(min))
+    logger.info('MAX value: {}'.format(max))
     logger.info('255 / (MAX - MIN): {}'.format(k))
     try:
         h, w = img.shape
@@ -34,6 +33,25 @@ def fix_contrast(img: np.ndarray):
             tmp[i][j] = (tmp[i][j] - min) * k
 
     return tmp
+
+def show_edges(img: np.ndarray, edges: np.ndarray, size: int = 1):
+    logger = log.getLogger('show_edges')
+    try:
+        h, w = img.shape
+    except ValueError:
+        logger.error('Wrong shape of image (image has {} channels instead of 1).'.format(img.shape[2]))
+        return
+
+    tmp = copy(img)
+    r = size // 2
+    for i in range(r, h-r):
+        for j in range(r, w-r):
+            if edges[i][j] != 0:
+                for x in range(i-r, i+r+1):
+                    for y in range(j-r, j+r+1):
+                        tmp[x][y] = 0
+
+    cv.imshow('image with edges', tmp)
 
 
 def main():
@@ -63,11 +81,19 @@ def main():
 
     contrast_gray_image = fix_contrast(gray_image)
 
-    # cv.imshow('original', image)
-    # cv.imshow('gray_image', gray_image)
-    # cv.imshow('contrast_gray_image', contrast_gray_image)
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
+    edges = cv.Canny(contrast_gray_image, 100, 200)
+    logger.info('Canny operator was applied!')
+
+
+
+    cv.imshow('original', image)
+    cv.imshow('gray_image', gray_image)
+    cv.imshow('contrast_gray_image', contrast_gray_image)
+    cv.imshow('edges', edges)
+    show_edges(contrast_gray_image, edges)
+
+    cv.waitKey(0)
+    cv.destroyAllWindows()
 
 
 if __name__ == "__main__":
